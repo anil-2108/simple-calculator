@@ -1,0 +1,139 @@
+import datetime
+
+class LibraryItem:
+    def __init__(self, title, category, author=None):
+        self.title = title
+        self.category = category
+        self.author = author
+        self.is_checked_out = False
+        self.due_date = None
+
+    def checkout(self, days=14):
+        """Check out an item and set its due date."""
+        if not self.is_checked_out:
+            self.is_checked_out = True
+            self.due_date = datetime.datetime.now() + datetime.timedelta(days=days)
+            print(f"{self.title} has been checked out. Due on {self.due_date.strftime('%Y-%m-%d')}.")
+        else:
+            print(f"{self.title} is already checked out.")
+
+    def return_item(self):
+        """Return an item and calculate overdue fines if applicable."""
+        if self.is_checked_out:
+            self.is_checked_out = False
+            overdue_fine = self.calculate_fine()
+            if overdue_fine > 0:
+                print(f"{self.title} is overdue. You owe a fine of ${overdue_fine:.2f}.")
+            else:
+                print(f"{self.title} has been returned on time.")
+            self.due_date = None
+        else:
+            print(f"{self.title} is not checked out.")
+
+    def calculate_fine(self):
+        """Calculate the overdue fine based on the current date."""
+        if self.due_date and datetime.datetime.now() > self.due_date:
+            overdue_days = (datetime.datetime.now() - self.due_date).days
+            fine = overdue_days * 0.5  # Fine is $0.50 per day
+            return fine
+        return 0
+
+class Book(LibraryItem):
+    def __init__(self, title, author):
+        super().__init__(title, category="Book", author=author)
+
+class Magazine(LibraryItem):
+    def __init__(self, title, category="Magazine"):
+        super().__init__(title, category)
+
+class DVD(LibraryItem):
+    def __init__(self, title, category="DVD"):
+        super().__init__(title, category)
+
+class Library:
+    def __init__(self):
+        self.items = []
+
+    def add_item(self, item):
+        """Add a new item (book, magazine, or DVD) to the library."""
+        self.items.append(item)
+        print(f"Added {item.title} to the library.")
+
+    def search(self, title=None, author=None, category=None):
+        """Search for items by title, author, or category."""
+        results = []
+        for item in self.items:
+            if (title and title.lower() in item.title.lower()) or \
+               (author and author.lower() in getattr(item, 'author', '').lower()) or \
+               (category and category.lower() == item.category.lower()):
+                results.append(item)
+        return results
+
+    def checkout_item(self, title):
+        """Check out an item from the library."""
+        for item in self.items:
+            if item.title.lower() == title.lower():
+                item.checkout()
+                return
+        print(f"Item {title} not found in the library.")
+
+    def return_item(self, title):
+        """Return an item to the library."""
+        for item in self.items:
+            if item.title.lower() == title.lower():
+                item.return_item()
+                return
+        print(f"Item {title} not found in the library.")
+
+    def list_items(self):
+        """List all items in the library."""
+        if not self.items:
+            print("No items in the library.")
+            return
+        print("Library Inventory:")
+        for item in self.items:
+            print(f"{item.title} ({item.category}) - {'Checked Out' if item.is_checked_out else 'Available'}")
+
+# Sample usage
+if __name__ == "__main__":
+    library = Library()
+
+    # Add items to the library
+    book1 = Book("The Catcher in the Rye", "J.D. Salinger")
+    magazine1 = Magazine("National Geographic")
+    dvd1 = DVD("The Godfather")
+
+    library.add_item(book1)
+    library.add_item(magazine1)
+    library.add_item(dvd1)
+
+    # List all items
+    library.list_items()
+
+    # Search for items
+    print("\nSearch for books by title 'Catcher':")
+    results = library.search(title="Catcher")
+    for item in results:
+        print(f"- {item.title} ({item.category})")
+
+    print("\nSearch for DVDs by category:")
+    results = library.search(category="DVD")
+    for item in results:
+        print(f"- {item.title} ({item.category})")
+
+    # Check out an item
+    print("\nChecking out 'The Catcher in the Rye'...")
+    library.checkout_item("The Catcher in the Rye")
+    library.list_items()
+
+    # Return an item
+    print("\nReturning 'The Catcher in the Rye'...")
+    library.return_item("The Catcher in the Rye")
+    library.list_items()
+
+    # Handle overdue fines
+    # Simulate an overdue situation by changing the due date
+    book1.checkout(days=1)  # Set a short loan period for testing
+    book1.due_date -= datetime.timedelta(days=5)  # Force overdue
+    print("\nReturning overdue book...")
+    library.return_item("The Catcher in the Rye")
