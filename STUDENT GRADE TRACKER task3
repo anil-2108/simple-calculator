@@ -1,0 +1,85 @@
+class StudentGradeManager:
+    def __init__(self, name):
+        self.name = name
+        self.grades = {}
+
+    def add_grade(self, subject, grade):
+        """Add or update the grade for a specific subject."""
+        self.grades[subject] = grade
+        print(f"Grade for {subject} added/updated: {grade}")
+
+    def calculate_average(self):
+        """Calculate the average grade."""
+        if len(self.grades) == 0:
+            print("No grades available to calculate average.")
+            return None
+        return sum(self.grades.values()) / len(self.grades)
+
+    def calculate_gpa(self):
+        """Calculate GPA (on a 4.0 scale)."""
+        grade_point_map = {
+            'A': 4.0, 'B': 3.0, 'C': 2.0, 'D': 1.0, 'F': 0.0
+        }
+        gpa_sum = 0.0
+        for grade in self.grades.values():
+            letter_grade = self.get_letter_grade(grade)
+            gpa_sum += grade_point_map.get(letter_grade, 0.0)
+        return gpa_sum / len(self.grades) if len(self.grades) > 0 else 0.0
+
+    def get_letter_grade(self, grade):
+        """Get the letter grade based on numerical score."""
+        if grade >= 90:
+            return 'A'
+        elif grade >= 80:
+            return 'B'
+        elif grade >= 70:
+            return 'C'
+        elif grade >= 60:
+            return 'D'
+        else:
+            return 'F'
+
+    def display_student_report(self):
+        """Display the student report with grades, average, and GPA."""
+        if not self.grades:
+            print("No grades available for the student.")
+            return
+
+        print(f"Report for {self.name}:")
+        for subject, grade in self.grades.items():
+            letter_grade = self.get_letter_grade(grade)
+            print(f"  {subject}: {grade} (Letter Grade: {letter_grade})")
+
+        avg_grade = self.calculate_average()
+        gpa = self.calculate_gpa()
+
+        print(f"\nAverage Grade: {avg_grade:.2f}")
+        print(f"GPA: {gpa:.2f}")
+
+
+def main():
+    # Create a StudentGradeManager object for a specific student
+    student_name = input("Enter student's name: ")
+    student = StudentGradeManager(student_name)
+
+    while True:
+        print("\n1. Add Grade")
+        print("2. View Report")
+        print("3. Exit")
+
+        choice = input("Choose an option: ")
+
+        if choice == '1':
+            subject = input("Enter subject name: ")
+            grade = float(input(f"Enter grade for {subject}: "))
+            student.add_grade(subject, grade)
+        elif choice == '2':
+            student.display_student_report()
+        elif choice == '3':
+            print("Exiting program.")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    main()
